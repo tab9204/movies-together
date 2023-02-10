@@ -1,8 +1,8 @@
 <script>
-    import Nav from "$lib/nav.svelte";
-    import Botnav from "$lib/botnav.svelte";
-    import Error from "$lib/error.svelte";
-    import Loading from "$lib/loading.svelte";
+    import Nav from "$lib/Nav.svelte";
+    import Botnav from "$lib/Botnav.svelte";
+    import Error from "$lib/Error.svelte";
+    import Loading from "$lib/Loading.svelte";
     import {pbSub} from "$lib/pb.js";
     
     
@@ -15,8 +15,6 @@
     //error message flag and text
     let showError = false;
     let errorText = "Error";
-
-    console.log(recs)
 
     //set up realtime listeners 
     pbSub('recommended_movies',(e)=>{

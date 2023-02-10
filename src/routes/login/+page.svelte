@@ -4,8 +4,6 @@
     export let data;
 
     export let form;
-    
-    //const user = writable(data.user);
 
 </script>
 

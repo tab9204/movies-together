@@ -22,7 +22,8 @@ export const actions = {
             const data = {
                 "username":body.username,
                 "password":body.password,
-                "buddy": "", //should default to empty
+                "buddy_id": "", //should default to empty
+                "buddy_username": "", //should default to empty
                 "passwordConfirm": body.password
             };
             //create the the new user record

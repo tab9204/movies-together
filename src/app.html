@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" href="%sveltekit.assets%/favicon.png" />
+		<meta name="viewport" content="width=device-width" />
+		%sveltekit.head%
+	</head>
+	<style>
+		:root {--red:#ed5867; --grey:#bfbbbb; --white:#f2f0f0; --blue:#5853ed;}
+		html{height: 100%;}
+		body{height: 100%; margin:0px; overflow: hidden; overscroll-behavior-y: contain;}
+		#pageContainer{height: 100%; width: 100%; overflow-y: auto; max-width: 640px; margin: 0px auto; background: var(--white);}
+		::-webkit-scrollbar {width: 0px;}
+	</style>
+	<body data-sveltekit-preload-data="hover">
+		<div style="height: 100%; display: flex; flex-direction: column;">%sveltekit.body%</div>
+	</body>
+</html>

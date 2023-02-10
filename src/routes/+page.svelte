@@ -1,9 +1,9 @@
 <script>
-  import Nav from "$lib/components/nav.svelte";
-  import Popup from "$lib/components/popup.svelte";
-  import Botnav from "$lib/components/botnav.svelte";
-  import Error from "$lib/components/error.svelte";
-  import Loading from "$lib/components/loading.svelte";
+  import Nav from "$lib/nav.svelte";
+  import Popup from "$lib/popup.svelte";
+  import Botnav from "$lib/botnav.svelte";
+  import Error from "$lib/error.svelte";
+  import Loading from "$lib/loading.svelte";
   import {pbSub} from "$lib/pb.js";
 
 

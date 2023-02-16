@@ -1,10 +1,12 @@
 import {redirect, fail} from '@sveltejs/kit';
+import {numRecs} from "$lib/server/recs.server.js"
 
 //return the user on page load
 export const load = async ({locals})=>{
     if(locals.user){
         return {
-            user:locals.user
+            user:locals.user,
+            numRecs: numRecs(locals)
         }
     }
     return {
@@ -26,12 +28,13 @@ export const actions = {
                 "buddy_username": "", //should default to empty
                 "passwordConfirm": body.password
             };
+            console.log(data);
             //create the the new user record
             const record = await locals.pb.collection('users').create(data);
             //log the new user in
             const authData = await locals.pb.collection('users').authWithPassword(
-                body.username,
-                body.password,
+                data.username,
+                data.password
             );  
         }
         catch(err){

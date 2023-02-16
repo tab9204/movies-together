@@ -1,10 +1,12 @@
 import {fail} from '@sveltejs/kit';
 import { redirect } from '@sveltejs/kit';
+import {numRecs} from "$lib/server/recs.server.js"
 
 
 export const load = async({locals})=>{
     return {
-        user: locals.user
+        user: locals.user,
+        numRecs: numRecs(locals)
     }
 
 }

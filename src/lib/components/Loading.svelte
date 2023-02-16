@@ -2,11 +2,13 @@
     import { navigating } from '$app/stores';
     import { beforeNavigate } from '$app/navigation';
     import { onDestroy } from 'svelte';
-    let show = true;
+    let show = false;
     let delay;
     //only show the loading animation if the user has waited at least 1 second
     beforeNavigate(()=>{
+        console.log("nav starting")
         show = false;
+        clearTimeout(delay);
         delay = setTimeout(()=>{
             console.log("delay goes off");
             show = true;
@@ -14,7 +16,7 @@
     })
 
     onDestroy(()=>{
-        clearTimeout(delay) ;
+        clearTimeout(delay);
     })
 
 </script>
@@ -40,9 +42,10 @@
         position: absolute;
         width: 100%;
         height: 100%;
-        z-index: 10;
+        z-index: 99;
         background: var(--white);
         margin: 0; 
+        left: 0;
     }
     #spinner{
         width: 200px;

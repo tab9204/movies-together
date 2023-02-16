@@ -25,7 +25,7 @@ export const pbSub = (collection,callback)=>{
       onDestroy(() => {
         try{
             unsubscribe?.();
-            console.log("unsubbed");
+            //console.log("unsubbed");
         }
         catch(err){
             console.log(err);

@@ -1,10 +1,12 @@
 <script>
-  import Nav from "$lib/Nav.svelte";
-  import Popup from "$lib/Popup.svelte";
-  import Botnav from "$lib/Botnav.svelte";
-  import Error from "$lib/Error.svelte";
-  import Loading from "$lib/Loading.svelte";
+  import Nav from "$lib/components/Nav.svelte";
+  import Popup from "$lib/components/Popup.svelte";
+  import Botnav from "$lib/components/Botnav.svelte";
+  import Error from "$lib/components/Error.svelte";
+  import Loading from "$lib/components/Loading.svelte";
+  import Iconbtn from "$lib/components/Iconbtn.svelte";
   import {pbSub} from "$lib/pb.js";
+	import Textbtn from "../lib/components/Textbtn.svelte";
 
 
   export let data;
@@ -59,7 +61,6 @@
   
   //shows the next movie in the movie array
   const next = async ()=>{
-    recMenu = false; 
     movies.shift();
     movies = movies;
     //if there are less then 10 movies left to view fetch more 
@@ -98,18 +99,17 @@
 </script>
 
 <Nav numRecs={numRecs}/>
-<Popup show={recMenu}>
-  <p>Recommend this movie for which list?</p>
+<Popup bind:show={recMenu}>
   <div id="listContainer">
     {#each lists as list}
-    <button on:click={()=>{recommend(movies[0].id,list.name);}}>{list.name}</button>
+    <Textbtn click={()=>{recommend(movies[0].id,list.name);}}>{list.name}</Textbtn>
     {/each}
-  <button on:click={()=>{recommend(movies[0].id,"");}}>No list</button>
+    <Textbtn click={()=>{recommend(movies[0].id,"");}}>No list</Textbtn>
   </div>
 </Popup>
-<div id="pageContainer" on:click={()=>{recMenu = false;}} on:keypress={()=>{recMenu = false;}}>
+<div id="pageContainer">
   <Loading></Loading>
-  <Error show={showError} errorMsg={errorText} hide={() => showError = false}></Error>
+  <Error bind:show={showError} errorMsg={errorText}></Error>
   {#if movies?.length > 0}
     <img class="poster" alt="Movie poster" loading="lazy" src="https://image.tmdb.org/t/p/w300/{movies[0].backdrop_path}">
     <div class="textContainer">
@@ -124,8 +124,8 @@
   {/if}
 </div>
 <Botnav>
-  <button on:click={()=>{recMenu = true;}}>Recommend</button>
-  <button on:click={next}>Next</button>
+  <Iconbtn icon="recommend" click={()=>{recMenu = true;}}></Iconbtn>
+  <Iconbtn icon="next" click={next}></Iconbtn>
 </Botnav>
 
 <style>
@@ -141,7 +141,7 @@
     position: relative;
     left: 50%;
     transform: translateX(-50%);
-    background: var(--blue);
+    background: var(--smoke);
   }
   .textContainer{
     padding: 10px;

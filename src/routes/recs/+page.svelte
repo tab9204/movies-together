@@ -1,8 +1,9 @@
 <script>
-    import Nav from "$lib/Nav.svelte";
-    import Botnav from "$lib/Botnav.svelte";
-    import Error from "$lib/Error.svelte";
-    import Loading from "$lib/Loading.svelte";
+    import Nav from "$lib/components/Nav.svelte";
+    import Botnav from "$lib/components/Botnav.svelte";
+    import Error from "$lib/components/Error.svelte";
+    import Loading from "$lib/components/Loading.svelte";
+    import Iconbtn from "$lib/components/Iconbtn.svelte";
     import {pbSub} from "$lib/pb.js";
     
     
@@ -86,7 +87,7 @@
 <Nav numRecs={numRecs}/>
 <div id="pageContainer">
     <Loading></Loading>
-    <Error show={showError} errorMsg={errorText} hide={() => showError = false}></Error>
+    <Error bind:show={showError} errorMsg={errorText}></Error>
     {#if recs.length > 0}
         <img class="poster" alt="Movie poster" loading="lazy" src="https://image.tmdb.org/t/p/w300/{recs[0].movie.image}">
         <div class="textContainer">
@@ -106,8 +107,8 @@
     {/if}
 </div>
 <Botnav>
-    <button on:click={()=>{accept(recs[0])}}>Yeah</button>
-    <button on:click={()=>{decline(recs[0])}}>Nah</button>
+    <Iconbtn icon="check" click={()=>{accept(recs[0])}}></Iconbtn>
+    <Iconbtn icon="cross" click={()=>{decline(recs[0])}}></Iconbtn>
 </Botnav>
 
 <style>

@@ -7,6 +7,7 @@ export const POST = async ({request, locals})=>{
     try{
         const data = {
             "movie": rec.movie,
+            "list": rec.list,
             "owners": [
                 locals.user.id,
                 locals.user.buddy_id

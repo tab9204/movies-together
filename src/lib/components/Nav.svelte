@@ -6,7 +6,7 @@
     import {fly} from 'svelte/transition';
 
     const navigate = (url)=>{
-
+        console.log("test")
     }
 
 

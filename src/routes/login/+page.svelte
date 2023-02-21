@@ -81,7 +81,7 @@
     #navigation{
         height: 30px;
         padding: 10px;
-        background: var(--red);
+        background: var(--yellow);
         display: flex;
         justify-content: space-between;
     }

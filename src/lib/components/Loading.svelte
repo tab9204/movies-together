@@ -2,28 +2,31 @@
     import { navigating } from '$app/stores';
     import { beforeNavigate } from '$app/navigation';
     import { onDestroy } from 'svelte';
-    let show = false;
-    let delay;
-    //only show the loading animation if the user has waited at least 1 second
+    let showLoadingIcon = false;
+    let delayIconShow;
+
+    //if user connection is fast we don't want to show the loading icon everytime they navigate 
+    //so we wait at least 1 second before showing it 
     beforeNavigate(()=>{
-        console.log("nav starting")
-        show = false;
-        clearTimeout(delay);
-        delay = setTimeout(()=>{
+        console.log("nav starting");
+        showLoadingIcon = false;
+        clearTimeout(delayIconShow);
+        delayIconShow = setTimeout(()=>{
             console.log("delay goes off");
-            show = true;
+            showLoadingIcon = true;
         },1000)
     })
 
     onDestroy(()=>{
-        clearTimeout(delay);
+        clearTimeout(delayIconShow);
+        showLoadingIcon = false;
     })
 
 </script>
 
 
 {#if $navigating}
-    {#if show}
+    {#if showLoadingIcon}
         <div id="loading">
             <div id="spinner">
                 <div class="rotate"></div>

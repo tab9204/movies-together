@@ -1,21 +1,21 @@
 <script>
     import Iconbtn from "$lib/components/Iconbtn.svelte";
 
-    export let show;
-    export let errorMsg;
+    export let showError;
+    export let errorMessage;
 
 
 </script>
 
-{#if show}
-    <div class="errortext">
-        <div>{errorMsg}</div>
-        <Iconbtn icon="cross" click={()=>{show = false;}}></Iconbtn>
+{#if showError}
+    <div class="errorMessage">
+        <div>{errorMessage}</div>
+        <Iconbtn icon="cross" click={()=>{showError = false;}}></Iconbtn>
     </div>
 {/if}
 
 <style>
-    .errortext{
+    .errorMessage{
         position: absolute;
         transform: translate(-50%,-50%);
         left: 50%;

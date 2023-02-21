@@ -1,11 +1,10 @@
 import 'dotenv/config';
 import {getRandomNumber} from "$lib/utils.js";
-import {numRecs} from "$lib/server/recs.server.js"
+import {getNumberOfRecs} from "$lib/server/recs.server.js"
 
 
 export const load = async ({locals})=>{
-  //fetch random movie data
-  const getMovies = async()=>{
+  const getRandomMovies = async()=>{
     try{
       //do an intial search of movies so we can get the total number of movie pages
       //we do this so that we can get a random page between 1 and the max number 
@@ -24,7 +23,7 @@ export const load = async ({locals})=>{
     }
   }
 
-  const getLists = async()=>{
+  const getUserLists = async()=>{
     try{
       const resp = await locals.pb.collection('lists').getList(1, 50, {
         filter: `owners ~ '${locals.user.id}' && owners ~ '${locals.user.buddy_id}'`
@@ -47,9 +46,9 @@ export const load = async ({locals})=>{
   }
 
   return {
-    movies: getMovies(),
-    numRecs: numRecs(locals),
-    lists: getLists(),
+    movies: getRandomMovies(),
+    numberOfRecs: getNumberOfRecs(locals),
+    lists: getUserLists(),
     user: locals.user
   }
 }

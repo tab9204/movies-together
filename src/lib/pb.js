@@ -5,12 +5,12 @@ const pb = new PocketBase('https://www.chilionrap.com');
 
 let unsubscribe = void(0);
 
-//collection => string pointing to the db collection we are listening to
-//callback => function to run when the collection updates 
+//pocketbase real time listeners so that we can keep user data on the page up to date in real time 
+//collection => db collection we are listening to
+//callback => run when the collection updates 
 export const pbSub = (collection,callback)=>{
-    //set up the db listener when the page mounts
     onMount(async () => {
-        console.log("mounted sub");
+       // console.log("mounted sub");
         try{
             //TODO: should auth the user before subscribing
             unsubscribe = await pb.collection(collection).subscribe('*', function (e) {

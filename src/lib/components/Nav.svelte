@@ -1,42 +1,55 @@
 <script>
-    import { goto } from '$app/navigation';
+    import {page} from '$app/stores';
+    import {goto,beforeNavigate} from '$app/navigation';
     import Iconbtn from "$lib/components/Iconbtn.svelte";
-    export let numRecs;
-    export let open = false;
+    import Loading from "$lib/components/Loading.svelte";
+    import {fly} from 'svelte/transition';
 
-    const togglePane = ()=>{
-        open = !open;
+    const navigate = (url)=>{
+
     }
+
+
+    export let numberOfRecs;
+    export let sidePaneOpen = false;
 
 </script>
 
 <div id="navigation">
     <div id="topBar">
-        <!--<Iconbtn icon="menu" click={()=>{goto(`/watchlist`, true) }}></Iconbtn>-->
-        <Iconbtn icon="menu" click={togglePane}></Iconbtn>
-        {#if numRecs > 0}
+        <Iconbtn icon="menu" click={()=>{sidePaneOpen = !sidePaneOpen;}}></Iconbtn>
+        {#if numberOfRecs > 0}
             <div class="notification"></div>
         {/if}
     </div>
-    {#if open}
-        <div id="sidePane">
-            <a href="/">Movies</a>
-            <a href="/watchlist">Watchlists</a>
+    <Loading></Loading>
+    {#if sidePaneOpen}
+        <div id="sidePane"
+            in:fly ="{{x: -222, duration: 300, opacity: 1 }}"
+            out:fly ="{{x: -222, duration: 0, opacity: 1 }}"
+            on:outroend="{()=>{console.log("end")}}"
+        >
+            <a href="/" class:selected="{$page.url.pathname == '/'}">Find Movies</a>
+            <a href="/watchlist" class:selected="{$page.url.pathname == '/watchlist'}">Watchlists</a>
             <div style="display:flex;">
-                <a href="/recs">Recommendations</a>
-                {#if numRecs > 0}
+                <a href="/recs" class:selected="{$page.url.pathname == '/recs'}">Recommendations</a>
+                {#if numberOfRecs > 0}
                     <div class="notification"></div>
                 {/if}
             </div>
-            <a href="/buddy">Movie Buddy</a>
+            <a href="/buddy" class:selected="{$page.url.pathname == '/buddy'}">Movie Buddy</a>
             <!--<a href="/options">Options</a>-->
-            <a href="/login">Logout</a>
+            <a href="/login" class:selected="{$page.url.pathname == '/login'}">Logout</a>
         </div>
-        <div id="close" on:click={togglePane} on:keypress={togglePane}></div>
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <div id="close" on:click={()=>{sidePaneOpen = !sidePaneOpen;}}></div>
     {/if}
 </div>
 
 <style>
+    #navigation{
+        z-index: 99;
+    }
     #topBar{
         display: flex;
         padding: 7px;
@@ -66,6 +79,10 @@
     #sidePane a {
         color: black;
         text-decoration: none;
+    }
+    #sidePane a.selected {
+        color: var(--blue);
+        text-decoration: underline;
     }
     #close{
         width: 100%;

@@ -1,9 +1,9 @@
-import {numRecs} from "$lib/server/recs.server.js"
+import {getNumberOfRecs} from "$lib/server/recs.server.js"
 
 export const load = async ({locals})=>{
-  const getWatchlist = async()=>{
+  const getUserMovies = async()=>{
     try{
-      const watchlist = await locals.pb.collection('watchlist').getList(1, 50, {
+      const watchlist = await locals.pb.collection('movies').getList(1, 50, {
         filter: `owners ~ '${locals.user.id}' && owners ~ '${locals.user.buddy_id}'`
       });
       let movies = [];
@@ -23,7 +23,7 @@ export const load = async ({locals})=>{
     }
   }
 
-  const getLists = async()=>{
+  const getUserLists = async()=>{
     try{
       const allLists = await locals.pb.collection('lists').getList(1, 50, {
         filter: `owners ~ '${locals.user.id}' && owners ~ '${locals.user.buddy_id}'`
@@ -45,9 +45,9 @@ export const load = async ({locals})=>{
   }
   
     return {
-      watchlist: getWatchlist(),
-      numRecs: numRecs(locals),
-      lists: getLists(),
+      movies: getUserMovies(),
+      numberOfRecs: getNumberOfRecs(locals),
+      lists: getUserLists(),
       user: locals.user
     }
   }

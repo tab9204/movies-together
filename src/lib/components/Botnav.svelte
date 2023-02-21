@@ -5,7 +5,7 @@
 
 <style>
     .botnav{
-        background: var(--smoke);
+        background: var(--yellow);
         padding: 5px;
         display: flex;
         justify-content: space-around;
@@ -13,6 +13,5 @@
         position: relative;
         left: 50%;
         transform: translateX(-50%);
-        border-top: 1px solid;
     }
 </style>

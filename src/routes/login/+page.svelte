@@ -1,33 +1,32 @@
 <script>
-    import Loading from "$lib/components/Loading.svelte";
     import Nav from "$lib/components/Nav.svelte";
     import {pbSub} from "$lib/pb.js";
 
     export let data;
     export let form;
 
-    let numRecs = data.numRecs;
+    let numberOfRecs = data.numberOfRecs;
 
-     //listen for new movie recs
      pbSub('recommended_movies',(e)=>{
-        //if the rec to field matches the user's id
         if(e.record.to == data.user.id){ 
-        //if a new rec was added 
-        if(e.action == "create"){
-            numRecs += 1;
-        }
+            if(e.action == "create"){
+                numberOfRecs += 1;
+            }
         }
     });
 
 </script>
 
+<!--
+    We don't want the user to access the rest of the app if they are not logged in
+    so we show a blank navigation header so they cannot navigate to the other pages 
+-->
 {#if data.user}
-    <Nav numRecs={numRecs}/>
+    <Nav {numberOfRecs}/>
 {:else}
     <div id="navigation"></div>
 {/if}
 <div id="pageContainer">
-    <Loading></Loading>
     {#if data.user}
         <form method="POST">
             <button formaction="?/logout">Logout</button>
@@ -49,7 +48,7 @@
 
 <style>
     form {
-        margin-top: 20px;
+        margin-top: 30px;
         padding: 10px;
         display: flex;
         flex-direction: column;
@@ -74,8 +73,10 @@
         width: 45%;
     }
     .error{
+        background: #fa3e3e;
         position: absolute;
-        top: 100%;
+        top: 36px;
+        padding: 5px
     }
     #navigation{
         height: 30px;

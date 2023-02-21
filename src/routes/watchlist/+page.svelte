@@ -3,7 +3,6 @@
     import Botnav from "$lib/components/Botnav.svelte";
     import Popup from "$lib/components/Popup.svelte";
     import Error from "$lib/components/Error.svelte";
-    import Loading from "$lib/components/Loading.svelte";
     import Iconbtn from "$lib/components/Iconbtn.svelte";
     import {pbSub} from "$lib/pb.js";
     import {fly} from 'svelte/transition';
@@ -11,35 +10,29 @@
     export let data;
 
 
-    //number of recs the user has
-    let numRecs = data.numRecs;
-    //all movies in the user watchlist
-    let watchlist = data.watchlist;
-    //all the lists the user has
-    let lists = data.lists;
-    //popup menu toggles
-    let addListMenu = false;
-    let deleteListMenu = false;
-    let deleteMovieMenu = false;
-    //error message flag and text
+    let numberOfRecs = data.numberOfRecs;
+    let userMovies = data.movies;
+    let userLists = data.lists;
+    let addListPopupToggle = false;
+    let deleteListPopupToggle = false;
+    let deleteMoviePopupToggle = false;
     let showError = false;
-    let errorText = "Error";
-    //timer before the start hold function goes off 
+    let errorMessage = "Error";
     let holdTimer;
+    //prevents a list section from being clicked on while it is being held on
     let held = false;
-    //matrix containing bool values to toggle delete button visiblity 
+    //used to keep track of the visibility of each list section delete button
     let deleteMatrix = [];
-    lists.forEach((list,i)=>{
+    userLists.forEach((list,i)=>{
         deleteMatrix.push(false);
     });
-    //index of the list to be deleted 
-    let deleteListIndex;
-    //id of the movie to be deleted 
-    let deleteMovieId;
-    //value of the add list input
-    let addListVal = "";
+    //data passed to popup menus that they need in order to carry out their function 
+    //IE to delete a list, to delete a movie 
+    let indexOfListBeingDeleted;
+    let idOfMovieBeingDeleted;
+    let addListInputValue = "";
 
-    //when the user starts holding
+
     //i => index of the list section within the delete matrix
     const startHold = (i)=>{
         held = false;
@@ -53,18 +46,16 @@
         clearTimeout(holdTimer);
     }
 
-    //collapses and expands a list section
     //section => the list section clicked on 
     //i => the sections index in the delete matrix
-    const listSectionClick = (section,i)=>{
-        //ignore if the user is holding
+    const listSectionExpandCollapse = (section,i)=>{
+        //we don't want to allow user clicked if they are already holding the section 
         if(held) {return;}
-        //ignore if the delete icon is showing
+        //we also want to make sure the delete icon is closed before allowing the user to click a section 
         if(deleteMatrix[i]){
             deleteMatrix[i] = false;
             return;
         }
-        //expand or collapse the section
         if(section.classList.contains("collapsed")){
             section.classList.remove("collapsed");
             section.style.height = "fit-content";
@@ -76,103 +67,95 @@
     }
     
     //adds a new list to the db
-    const addList = async ()=>{
-        //if empty exit out 
-        if(addListVal == ""){return;}
+    const addNewList = async ()=>{ 
+        //input value cannot be blank
+        if(addListInputValue == ""){return;}
         const resp = await fetch("/api/addlist",{
             method: 'POST',
-            body: JSON.stringify({name:addListVal}),
+            body: JSON.stringify({name:addListInputValue}),
             headers: {'content-type': 'application/json'}
         });
-        //reset the text input and close popup
-        addListVal = "";
-        addListMenu = false;
-
+        addListInputValue = "";
+        addListPopupToggle = false;
         const data = await resp.json();
-        //message = error
-        if(data.message){
-            errorText = `Could not create new list. Try again`;
+        var error = data.message;
+        if(error){
+            errorMessage = `Could not create new list. Try again`;
             showError = true;
         }
 
     }
 
-    //deletes a list from the db
-    //id => db entry id 
+    //id =>  list db entry id 
     const deleteList = async (id)=>{
         const resp = await fetch("/api/deletelist",{
             method: 'POST',
             body: JSON.stringify({id:id}),
             headers: {'content-type': 'application/json'}
         });
-        //close the popup
-        deleteListMenu = false; 
+        deleteListPopupToggle = false; 
         const data = await resp.json();
-        //no message no error
-        if(data.message){
-            errorText = `Could not delete list. Try again`;
+        var error = data.message;
+        if(error){
+            errorMessage = `Could not delete list. Try again`;
             showError = true;
         }
 
     }
 
-    //deletes a movies fomr the db 
-    //id => db entry id
+    //id =>  movie db entry id
     const deleteMovie = async (id)=>{
         const resp = await fetch("/api/deletemovie",{
             method: 'POST',
-            body: JSON.stringify({id:deleteMovieId}),
+            body: JSON.stringify({id:idOfMovieBeingDeleted}),
             headers: {'content-type': 'application/json'}
         });
-        //close the popup
-        deleteMovieMenu = false;
+        deleteMoviePopupToggle = false;
         const data = await resp.json();
-        //no message no error
-        if(data.message){
-            errorText = `Could not delete the movie. Try again`;
+        var error = data.message;
+        if(error){
+            errorMessage = `Could not delete the movie. Try again`;
             showError = true;
         }
 
     }
 
-    //set up realtime listeners 
-
     pbSub('recommended_movies',(e)=>{
         if(e.record.to == data.user.id){ 
-            //newly added
             if(e.action == "create"){
-                numRecs += 1;
+                numberOfRecs += 1;
             }
         }
     });
 
     pbSub('lists',(e)=>{
+        //we only want lists where the owners are both the user and their current buddy
         if(e.record.owners.includes(data.user.id) && e.record.owners.includes(data.user.buddy_id)){  
             if(e.action == "create"){
                 const newList = {
                     id: e.record.id ,
                     name: e.record.name
                 }
-                lists.push(newList);
-                lists = lists;
+                userLists.push(newList);
+                userLists = userLists;
                 //need to keep the delete matrix in sync with the lists
                 deleteMatrix.push(false);
                 deleteMatrix = deleteMatrix;
             }
             else if (e.action == "delete"){
-                lists.forEach((list, i) => {
+                userLists.forEach((list, i) => {
                     if(list.id == e.record.id){
-                        lists.splice(i,1);
+                        userLists.splice(i,1);
                         deleteMatrix.splice(i,1);
                     }
                 });
-                lists = lists;
+                userLists = userLists;
                 deleteMatrix = deleteMatrix;
             }
         }
     });
 
-    pbSub('watchlist',(e)=>{
+    pbSub('movies',(e)=>{
         if(e.record.owners.includes(data.user.id) && e.record.owners.includes(data.user.buddy_id)){ 
             if(e.action == "create"){
                 const newMovie = {
@@ -180,54 +163,53 @@
                     list: e.record.list,
                     movie: e.record.movie
                 }
-                lists.push(newMovie);
-                watchlist = watchlist;
+                userMovies.push(newMovie);
+                userMovies = userMovies;
             }
             else if (e.action == "delete"){
-                watchlist.forEach((item, i) => {
+                userMovies.forEach((item, i) => {
                     if(item.id == e.record.id){
-                        watchlist.splice(i,1);
+                        userMovies.splice(i,1);
                     }
                 });
-                watchlist = watchlist; 
+                userMovies = userMovies; 
             }
         }
     });
 
 </script>
 
-<Nav numRecs={numRecs}/>
-<Popup bind:show={addListMenu}>
+<Nav {numberOfRecs}/>
+<Popup bind:show={addListPopupToggle}>
     <p>Add a new watch list?</p>
     <div style="display:flex; flex-drection:column; gap:5px;">
-        <input id="listInput" type="text" bind:value={addListVal} placeholder="Add a new list" style="flex-grow:2;" />
-        <Iconbtn icon="check" click={addList}></Iconbtn>
+        <input id="listInput" type="text" bind:value={addListInputValue} placeholder="Add a new list" style="flex-grow:2;" />
+        <Iconbtn icon="check" click={addNewList}></Iconbtn>
     </div>
 </Popup>
-<Popup bind:show={deleteListMenu}>
+<Popup bind:show={deleteListPopupToggle}>
     <p>Delete this list?</p>
     <div style="display: flex; justify-content: space-around;">
-        <Iconbtn icon="check" click={()=>{deleteList(lists[deleteListIndex].id);}}></Iconbtn>
-        <Iconbtn icon="cross" click={()=>{deleteMatrix[deleteListIndex] = false; deleteListMenu = false;}}></Iconbtn>
+        <Iconbtn icon="check" click={()=>{deleteList(userLists[indexOfListBeingDeleted].id);}}></Iconbtn>
+        <Iconbtn icon="cross" click={()=>{deleteMatrix[indexOfListBeingDeleted] = false; deleteListPopupToggle = false;}}></Iconbtn>
     </div>
 </Popup>
-<Popup bind:show={deleteMovieMenu}>
+<Popup bind:show={deleteMoviePopupToggle}>
     <p>Delete this movie?</p>
     <div style="display:flex; justify-content: space-evenly;">
         <Iconbtn icon="check" click={deleteMovie}></Iconbtn>
-        <Iconbtn icon="cross" click={()=>{deleteMovieMenu = false;}}></Iconbtn>
+        <Iconbtn icon="cross" click={()=>{deleteMoviePopupToggle = false;}}></Iconbtn>
     </div>
 </Popup>
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div id="pageContainer">
-    <Loading></Loading>
-    <Error bind:show={showError} errorMsg={errorText}></Error>
-    <div id="watchlist">
+    <Error bind:showError={showError} {errorMessage}></Error>
+    <div id="movies">
         <!--movies in an existing list-->
-        {#each lists as list, i (i)}
+        {#each userLists as list, i (i)}
             <div class="listSection collapsed">
                 <div class="list"
-                    on:click={(e)=>{listSectionClick(e.currentTarget.parentNode,i)}} 
+                    on:click={(e)=>{listSectionExpandCollapse(e.currentTarget.parentNode,i)}} 
                     on:touchstart={(e)=>{startHold(i);}}
                     on:mousedown={(e)=>{startHold(i);}}
                     on:touchend={(e)=>{cancelHold();}}
@@ -241,32 +223,32 @@
                         <div class="deleteIcon" 
                             in:fly ="{{x: 80, duration: 300, opacity: 1 }}" 
                             out:fly ="{{x:80, duration: 300, opacity: 1 }}" 
-                            on:click={(e)=>{e.stopPropagation(); deleteListMenu = true; deleteListIndex = i;}}
+                            on:click={(e)=>{e.stopPropagation(); deleteListPopupToggle = true; indexOfListBeingDeleted = i;}}
                         >
                             <Iconbtn icon="delete"></Iconbtn>
                         </div>
                     {/if}
                 </div>
                 <div class="movies">
-                    {#each watchlist as entry}
-                        {#if entry.list == list.name}
+                    {#each userMovies as movie}
+                        {#if movie.list == list.name}
                             <div class="movie">
                                 <div class="title">
                                     <div>
-                                        <div class="name">{entry.movie.title}</div>
-                                        <div class="date">({entry.movie.release_date})</div>
+                                        <div class="name">{movie.movie.title}</div>
+                                        <div class="date">({movie.movie.release_date})</div>
                                     </div>
                                     <div>
-                                        <Iconbtn icon="delete" click={()=>{deleteMovieMenu = true; deleteMovieId = entry.id;}}></Iconbtn>
+                                        <Iconbtn icon="delete" click={()=>{deleteMoviePopupToggle = true; idOfMovieBeingDeleted = movie.id;}}></Iconbtn>
                                     </div>
                                 </div>
                                 <div class="genres">
-                                    {#each entry.movie.genres as genre, i}
+                                    {#each movie.movie.genres as genre, i}
                                         <div>{genre}</div>
                                     {/each}
                                 </div>
-                                <div class="time">{entry.movie.runtime} minutes</div>
-                                <p>{entry.movie.overview}</p>
+                                <div class="time">{movie.movie.runtime} minutes</div>
+                                <p>{movie.movie.overview}</p>
                             </div>
                         {/if}
                     {/each}
@@ -275,32 +257,32 @@
         {/each}
         <!--movies not in an existing list-->
         <div class="listSection collapsed">
-            <div class="list" on:click={(e)=>{listSectionClick(e.currentTarget.parentNode)}}>
+            <div class="list" on:click={(e)=>{listSectionExpandCollapse(e.currentTarget.parentNode)}}>
                 Unlisted
                 <div class="expandIcon">
                     <Iconbtn icon="expand"></Iconbtn>
                 </div>
             </div>
             <div class="movies">
-                {#each watchlist as entry}
-                    {#if !lists.find(list => list.name == entry.name)}
+                {#each userMovies as movie}
+                    {#if !userLists.find(list => list.name == movie.name)}
                         <div class="movie">
                             <div class="title">
                                 <div>
-                                    <div class="name">{entry.movie.title}</div>
-                                    <div class="date">({entry.movie.release_date})</div>
+                                    <div class="name">{movie.movie.title}</div>
+                                    <div class="date">({movie.movie.release_date})</div>
                                 </div>
                                 <div>
-                                    <Iconbtn icon="delete" click={()=>{deleteMovieMenu = true; deleteMovieId = entry.id;}}></Iconbtn>
+                                    <Iconbtn icon="delete" click={()=>{deleteMoviePopupToggle = true; idOfMovieBeingDeleted = movie.id;}}></Iconbtn>
                                 </div>
                             </div>
                             <div class="genres">
-                                {#each entry.movie.genres as genre, i}
+                                {#each movie.movie.genres as genre, i}
                                     <div>{genre}</div>   
                                 {/each}
                             </div>
-                            <div class="time">{entry.movie.runtime} minutes</div>
-                            <p>{entry.movie.overview}</p>
+                            <div class="time">{movie.movie.runtime} minutes</div>
+                            <p>{movie.movie.overview}</p>
                         </div>
                     {/if}
                 {/each}
@@ -309,12 +291,12 @@
     </div>
 </div>
 <Botnav>
-    <Iconbtn icon="add" click={()=>{addListMenu = true;}}></Iconbtn>
+    <Iconbtn icon="add" click={()=>{addListPopupToggle = true;}}></Iconbtn>
 </Botnav>
 
 <style>
 
-    #watchlist{
+    #movies{
         position: relative;
         left: 50%; transform: translateX(-50%);
         height: 100%; 
@@ -344,11 +326,12 @@
         border-radius: 6px;
     }
     .listSection.collapsed .list .expandIcon{
-        transform: rotate(270deg);
+        transform: rotate(-90deg);
     }
     .expandIcon{
         width: 40px;
         height: 40px;
+        transition: .3s;
     }
     .deleteIcon{
         position: absolute;

@@ -1,28 +1,26 @@
-//adds a new tag to the db
 import {error} from '@sveltejs/kit';
 
 export const POST = async ({request, locals})=>{
-    const tag = await request.json();
+    const list = await request.json();
     try{
         
-        const data = {
-            "name": tag.name,
+        const newListEntry = {
+            "name": list.name,
             "owners": [
                 locals.user.id,
                 locals.user.buddy_id
             ]
         };
-        const record = await locals.pb.collection('lists').create(data);
-        const newTag = {
+        const record = await locals.pb.collection('lists').create(newListEntry);
+        const newList = {
             id: record.id,
             name: record.name
         }
-        //respond back so the client can be properly updated 
-        return new Response(JSON.stringify(newTag));
+        return new Response(JSON.stringify(newList));
     }
-    catch(error){
-        console.log(error);
-        throw new error (400,'Could not add new tag');
+    catch(err){
+        console.log(err);
+        throw new error (400,'Could not add new list');
     }
 
 }

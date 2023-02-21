@@ -2,43 +2,21 @@
     import Nav from "$lib/components/Nav.svelte";
     import Botnav from "$lib/components/Botnav.svelte";
     import Error from "$lib/components/Error.svelte";
-    import Loading from "$lib/components/Loading.svelte";
     import Iconbtn from "$lib/components/Iconbtn.svelte";
     import {pbSub} from "$lib/pb.js";
     
     
     export let data;
 
-    //list of movie recommendations the user has
-    let recs = data.recs;
-    //total number of recs
-    let numRecs = data.recs.length;
-    //error message flag and text
+    let movieRecs = data.movieRecs;
+    let numberOfRecs = data.movieRecs.length;
     let showError = false;
-    let errorText = "Error";
+    let errorMessage = "Error";
 
-    //set up realtime listeners 
-    pbSub('recommended_movies',(e)=>{
-        //increase and descrease the recs notification in the nav
-        if(e.record.to == data.user.id){
-            if(e.action == "create"){
-                const new_rec = {
-                    id: e.record.id,
-                    movie: e.record.movie,
-                    list: e.record.tag
-                }
-                recs.push(new_rec);
-                recs = recs;
-                numRecs += 1;
-            }
-            else if(e.action == "delete"){
-                numRecs -= 1;
-            }  
-        }
-    });
 
-    //rec accept
-    const accept = async (movie)=>{
+    const acceptMovieRec = async (movie)=>{
+        //the accept and decline buttons are active even without a current movie recommendation 
+        //so we return out to prevent any uneeded fetch requests 
         if(!movie){return;}
         const resp = await fetch("/api/acceptrec",{
             method: 'POST',
@@ -46,59 +24,70 @@
             headers: {'content-type': 'application/json'}
         });
         const data = await resp.json();
-        //error
-        if(data.message){
-            errorText = data.message;
+        const error = data.message;
+        if(error){
+            errorMessage = data.message;
             showError = true;
         }
-        //no error
         else{
-            //remove the first rec so we can show the next one
-            recs.shift();
-            recs = recs;
+            movieRecs.shift();
+            movieRecs = movieRecs;
         }
     }
 
-    //rec decline
-    const decline = async (movie)=>{
+    const declineMovieRec = async (movie)=>{
         if(!movie){return;}
-        console.log(movie)
         const resp = await fetch("/api/declinerec",{
             method: 'POST',
             body: JSON.stringify(movie.id),
             headers: {'content-type': 'application/json'}
         });
         const data = await resp.json();
-        //error
-        if(data.message){
-            errorText = data.message;
+        const error = data.message;
+        if(error){
+            errorMessage = data.message;
             showError = true;
         }
-        //no error
         else{
-            //remove the first rec so we can show the next one
-            recs.shift();
-            recs = recs;
+            movieRecs.shift();
+            movieRecs = movieRecs;
         }
     }
+
+    pbSub('recommended_movies',(e)=>{
+        if(e.record.to == data.user.id){
+            if(e.action == "create"){
+                const new_rec = {
+                    id: e.record.id,
+                    movie: e.record.movie,
+                    list: e.record.tag
+                }
+                movieRecs.push(new_rec);
+                movieRecs = movieRecs;
+                numberOfRecs += 1;
+            }
+            else if(e.action == "delete"){
+                numberOfRecs -= 1;
+            }  
+        }
+    });
         
 </script>
 
-<Nav numRecs={numRecs}/>
+<Nav {numberOfRecs}/>
 <div id="pageContainer">
-    <Loading></Loading>
-    <Error bind:show={showError} errorMsg={errorText}></Error>
-    {#if recs.length > 0}
-        <img class="poster" alt="Movie poster" loading="lazy" src="https://image.tmdb.org/t/p/w300/{recs[0].movie.image}">
+    <Error bind:showError={showError} {errorMessage}></Error>
+    {#if numberOfRecs > 0}
+        <img class="poster" alt="Movie poster" loading="lazy" src="https://image.tmdb.org/t/p/w300/{movieRecs[0].movie.image}">
         <div class="textContainer">
-            {#if recs[0].list != ""}<p>{recs[0].list}</p>{/if}
-            <h2>{recs[0].movie.title}</h2>
-            <h4>{recs[0].movie.release_date}</h4>
-            <h4>{recs[0].movie.runtime} minutes</h4>
-            {#each recs[0].movie.genres as genre}
+            {#if movieRecs[0].list}<p>{movieRecs[0].list}</p>{/if}
+            <h2>{movieRecs[0].movie.title}</h2>
+            <h4>{movieRecs[0].movie.release_date}</h4>
+            <h4>{movieRecs[0].movie.runtime} minutes</h4>
+            {#each movieRecs[0].movie.genres as genre}
                 <p>{genre}</p>
             {/each}
-            <p>{recs[0].movie.overview}</p>
+            <p>{movieRecs[0].movie.overview}</p>
         </div>
     {:else}
         <div class="textContainer">
@@ -107,8 +96,8 @@
     {/if}
 </div>
 <Botnav>
-    <Iconbtn icon="check" click={()=>{accept(recs[0])}}></Iconbtn>
-    <Iconbtn icon="cross" click={()=>{decline(recs[0])}}></Iconbtn>
+    <Iconbtn icon="check" click={()=>{acceptMovieRec(movieRecs[0])}}></Iconbtn>
+    <Iconbtn icon="cross" click={()=>{declineMovieRec(movieRecs[0])}}></Iconbtn>
 </Botnav>
 
 <style>

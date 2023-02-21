@@ -1,3 +1,4 @@
+//used to pass non plain old js objects to the client 
 export const serializeNonPOJOs = (obj)=>{
     return structuredClone(obj);
 }

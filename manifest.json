@@ -1,0 +1,23 @@
+{
+  "short_name": "Movies Together",
+  "name": "Movies Together",
+  "icons": [
+    {
+      "src": "./static/movie-camera-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./static/movie-camera-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "background_color": "#ffffff",
+  "theme_color": "#F2AF29",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait"
+}

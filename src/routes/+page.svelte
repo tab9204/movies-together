@@ -6,6 +6,7 @@
   import Iconbtn from "$lib/components/Iconbtn.svelte";
   import {pbSub} from "$lib/pb.js";
 	import Textbtn from "../lib/components/Textbtn.svelte";
+  import {fly} from 'svelte/transition';
 
 
   export let data;
@@ -98,16 +99,22 @@
 <div id="pageContainer">
   <Error bind:showError={showError} {errorMessage}></Error>
   {#if randomMovies?.length > 0}
-    {#if randomMovies[0].backdrop_path != null}
-      <img class="poster" alt="Movie poster" loading="lazy" src="https://image.tmdb.org/t/p/w300/{randomMovies[0].backdrop_path}">
-    {:else}
-      <div class="poster"></div>
-    {/if}
-    <div class="textContainer">
-      <h2>{randomMovies[0].title}</h2>
-      <h4>{new Date(randomMovies[0].release_date).getFullYear()}</h4>
-      <p>{randomMovies[0].overview}</p>
-    </div>
+    {#key randomMovies[0]}
+      <div id="movie" in:fly ="{{x: 640, duration: 300, opacity: 1 }}">
+        {#if randomMovies[0].backdrop_path != null}
+          <img class="poster" alt="Movie poster" loading="lazy" src="https://image.tmdb.org/t/p/w300/{randomMovies[0].backdrop_path}">
+        {:else}
+          <div class="poster">
+            <img class="defaultImage" alt ="movie" src="/movie-camera-192.svg">
+          </div>
+        {/if}
+          <div class="textContainer">
+            <h2>{randomMovies[0].title}</h2>
+            <h4>{new Date(randomMovies[0].release_date).getFullYear()}</h4>
+            <p>{randomMovies[0].overview}</p>
+          </div>
+      </div>
+    {/key}
   {:else}
     <div class="textContainer">
       <p>No more movies to view. Adjust your search options.</p>
@@ -133,6 +140,13 @@
     left: 50%;
     transform: translateX(-50%);
     background: var(--smoke);
+  }
+  .poster .defaultImage{
+    height: 169px;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 5px;
   }
   .textContainer{
     padding: 10px;

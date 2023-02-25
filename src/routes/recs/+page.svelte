@@ -4,6 +4,7 @@
     import Error from "$lib/components/Error.svelte";
     import Iconbtn from "$lib/components/Iconbtn.svelte";
     import {pbSub} from "$lib/pb.js";
+    import {fly} from "svelte/transition";
     
     
     export let data;
@@ -12,6 +13,7 @@
     let numberOfRecs = data.movieRecs.length;
     let showError = false;
     let errorMessage = "Error";
+
 
 
     const acceptMovieRec = async (movie)=>{
@@ -77,18 +79,22 @@
 <Nav {numberOfRecs}/>
 <div id="pageContainer">
     <Error bind:showError={showError} {errorMessage}></Error>
-    {#if numberOfRecs > 0}
-        <img class="poster" alt="Movie poster" loading="lazy" src="https://image.tmdb.org/t/p/w300/{movieRecs[0].movie.image}">
-        <div class="textContainer">
-            {#if movieRecs[0].list}<p>{movieRecs[0].list}</p>{/if}
-            <h2>{movieRecs[0].movie.title}</h2>
-            <h4>{movieRecs[0].movie.release_date}</h4>
-            <h4>{movieRecs[0].movie.runtime} minutes</h4>
-            {#each movieRecs[0].movie.genres as genre}
-                <p>{genre}</p>
-            {/each}
-            <p>{movieRecs[0].movie.overview}</p>
-        </div>
+    {#if movieRecs.length > 0}
+        {#key movieRecs[0]}
+            <div id="movie" in:fly="{{x: 640, duration: 300, opacity: 1 }}">
+                <img class="poster" alt="Movie poster" loading="lazy" src="https://image.tmdb.org/t/p/w300/{movieRecs[0].movie.image}">
+                <div class="textContainer">
+                    {#if movieRecs[0].list}<p>{movieRecs[0].list}</p>{/if}
+                    <h2>{movieRecs[0].movie.title}</h2>
+                    <h4>{movieRecs[0].movie.release_date}</h4>
+                    <h4>{movieRecs[0].movie.runtime} minutes</h4>
+                    {#each movieRecs[0].movie.genres as genre}
+                        <p>{genre}</p>
+                    {/each}
+                    <p>{movieRecs[0].movie.overview}</p>
+                </div>
+            </div>
+        {/key}
     {:else}
         <div class="textContainer">
             <p>You have no recommended movies</p>

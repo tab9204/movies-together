@@ -5,19 +5,22 @@
     import Loading from "$lib/components/Loading.svelte";
     import {fly} from 'svelte/transition';
 
-    const navigate = (url)=>{
-        console.log("test")
-    }
-
-
     export let numberOfRecs;
     export let sidePaneOpen = false;
+
+    let navigationRoute = undefined;
+
+    const navigate = ()=>{
+        if(navigationRoute == $page.url.pathname || !navigationRoute){return;}
+        goto(navigationRoute);
+    }
+
 
 </script>
 
 <div id="navigation">
     <div id="topBar">
-        <Iconbtn icon="menu" click={()=>{sidePaneOpen = !sidePaneOpen;}}></Iconbtn>
+        <Iconbtn icon="menu" click={()=>{ navigationRoute = undefined; sidePaneOpen = !sidePaneOpen;}}></Iconbtn>
         {#if numberOfRecs > 0}
             <div class="notification"></div>
         {/if}
@@ -25,24 +28,29 @@
     <Loading></Loading>
     {#if sidePaneOpen}
         <div id="sidePane"
-            in:fly ="{{x: -222, duration: 300, opacity: 1 }}"
-            out:fly ="{{x: -222, duration: 0, opacity: 1 }}"
-            on:outroend="{()=>{console.log("end")}}"
+            in:fly ="{{x: -222, duration: 200, opacity: 1 }}"
+            out:fly ="{{x: -222, duration: 200, opacity: 1 }}"
+            on:outroend="{navigate}"
         >
-            <a href="/" class:selected="{$page.url.pathname == '/'}">Find Movies</a>
-            <a href="/watchlist" class:selected="{$page.url.pathname == '/watchlist'}">Watchlists</a>
+            <!-- svelte-ignore a11y-click-events-have-key-events -->
+            <div class="link" class:selected="{$page.url.pathname == '/'}" on:click={()=>{navigationRoute = "/"; sidePaneOpen=false;}}>Find Movies</div>
+            <!-- svelte-ignore a11y-click-events-have-key-events -->
+            <div class="link" class:selected="{$page.url.pathname == '/watchlist'}" on:click={()=>{navigationRoute = "/watchlist"; sidePaneOpen=false;}}>Watchlists</div>
             <div style="display:flex;">
-                <a href="/recs" class:selected="{$page.url.pathname == '/recs'}">Recommendations</a>
+                <!-- svelte-ignore a11y-click-events-have-key-events -->
+                <div class="link" class:selected="{$page.url.pathname == '/recs'}" on:click={()=>{navigationRoute = "/recs"; sidePaneOpen=false;}}>Recommendations</div>
                 {#if numberOfRecs > 0}
                     <div class="notification"></div>
                 {/if}
             </div>
-            <a href="/buddy" class:selected="{$page.url.pathname == '/buddy'}">Movie Buddy</a>
+            <!-- svelte-ignore a11y-click-events-have-key-events -->
+            <div class="link" class:selected="{$page.url.pathname == '/buddy'}" on:click={()=>{navigationRoute = "/buddy"; sidePaneOpen=false;}}>Movie Buddy</div>
             <!--<a href="/options">Options</a>-->
-            <a href="/login" class:selected="{$page.url.pathname == '/login'}">Logout</a>
+            <!-- svelte-ignore a11y-click-events-have-key-events -->
+            <div class="link" class:selected="{$page.url.pathname == '/login'}" on:click={()=>{navigationRoute = "/login"; sidePaneOpen=false;}}>Logout</div>
         </div>
         <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <div id="close" on:click={()=>{sidePaneOpen = !sidePaneOpen;}}></div>
+        <div id="close" on:click={()=>{navigationRoute = undefined; sidePaneOpen =false;}}></div>
     {/if}
 </div>
 
@@ -76,11 +84,13 @@
         gap: 10px;
         padding: 10px;
     }
-    #sidePane a {
+    #sidePane .link {
         color: black;
         text-decoration: none;
+        font-size: 1.2rem;
+        cursor: pointer;
     }
-    #sidePane a.selected {
+    #sidePane .link.selected {
         color: var(--blue);
         text-decoration: underline;
     }

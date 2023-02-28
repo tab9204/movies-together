@@ -1,6 +1,6 @@
 <script>
     import {page} from '$app/stores';
-    import {goto,beforeNavigate} from '$app/navigation';
+    import {goto} from '$app/navigation';
     import Iconbtn from "$lib/components/Iconbtn.svelte";
     import Loading from "$lib/components/Loading.svelte";
     import {fly} from 'svelte/transition';
@@ -45,7 +45,8 @@
             </div>
             <!-- svelte-ignore a11y-click-events-have-key-events -->
             <div class="link" class:selected="{$page.url.pathname == '/buddy'}" on:click={()=>{navigationRoute = "/buddy"; sidePaneOpen=false;}}>Movie Buddy</div>
-            <!--<a href="/options">Options</a>-->
+            <!-- svelte-ignore a11y-click-events-have-key-events -->
+            <div class="link" class:selected="{$page.url.pathname == '/options'}" on:click={()=>{navigationRoute = "/options"; sidePaneOpen=false;}}>Search Options</div>
             <!-- svelte-ignore a11y-click-events-have-key-events -->
             <div class="link" class:selected="{$page.url.pathname == '/login'}" on:click={()=>{navigationRoute = "/login"; sidePaneOpen=false;}}>Logout</div>
         </div>

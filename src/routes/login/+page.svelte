@@ -52,7 +52,7 @@
         padding: 10px;
         display: flex;
         flex-direction: column;
-        gap: 5px;
+        gap: 10px;
     }
     form div{
         display: flex;

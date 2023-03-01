@@ -2,8 +2,7 @@ import PocketBase from 'pocketbase';
 import {serializeNonPOJOs} from "$lib/utils.js";
 import { redirect } from '@sveltejs/kit';
 
-export const handle = async ({event,resolve,url}) =>{
-    //console.log("Running hooks");
+export const handle = async ({event,resolve}) =>{
     //set the pb instance
     event.locals.pb = new PocketBase('https://www.chilionrap.com');
     //load the auth cookie or set to empty if there isn't one
@@ -32,7 +31,7 @@ export const handle = async ({event,resolve,url}) =>{
     }
     
     const response = await resolve(event);
-    //st the auth cookie
+    //set the auth cookie
     response.headers.set("set-cookie", event.locals.pb.authStore.exportToCookie({secure:true}));
 
 
